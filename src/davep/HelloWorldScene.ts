@@ -1,13 +1,13 @@
 import Phaser from 'phaser'
+import sceneConfig from './config'
+import grass from './platforms';
 
 export default class HelloWorldScene extends Phaser.Scene {
-  //private platforms?: Phaser.Physics.Arcade.StaticGroup;
+  private platforms?: Phaser.Physics.Arcade.StaticGroup;
   private player?: Phaser.Physics.Arcade.Sprite;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-  private map?: Phaser.Tilemaps.Tilemap;
-  private groundLayer?: Phaser.Tilemaps.TilemapLayer;
   constructor() {
-    super('hello-world')
+    super(sceneConfig)
   }
 
   preload() {
@@ -19,36 +19,24 @@ export default class HelloWorldScene extends Phaser.Scene {
       'assets/dude.png',
       { frameWidth: 32, frameHeight: 48 }
     );
-    this.load.tilemapTiledJSON('map', 'assets/daves.json');
-    this.load.image('tiles', 'assets/buch-outdoor.png');
   }
 
   create() {
-    this.add.image(400, 300, 'sky')
-    this.map = this.make.tilemap({ key: 'map' });
-    // tiles for the ground layer
-    var groundTiles = this.map.addTilesetImage('outdoors', 'tiles');
-    // create the ground layer
-    this.groundLayer = this.map.createLayer('Platforms', groundTiles, 0, 200);
-    // the player will collide with this layer
-    this.groundLayer.setCollisionByExclusion([-1]);
+    this.add.image(400, 300, 'sky').setScale(2,3)
 
+    this.platforms = this.physics.add.staticGroup()
+    grass.forEach(grass => {
+      const ground = this.platforms!.create(grass.x, grass.y, 'ground') as Phaser.Physics.Arcade.Sprite
+      ground.setScale(grass.xScale, grass.yScale).refreshBody()
 
-
-
-    //this.platforms = this.physics.add.staticGroup()
-    //const ground = this.platforms.create(400, 500, 'ground') as Phaser.Physics.Arcade.Sprite
-    //ground.setScale(2).refreshBody()
+    })    
 
     this.player = this.physics.add.sprite(100, 350, 'dude');
-    ///this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.player, this.platforms);
 
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
-    this.cursors = this.input.keyboard.createCursorKeys();
-    //this.cameras.main.startFollow(this.player);
-    //this.cameras.main.setBackgroundColor('#ccccff');
-
+    this.cursors = this.input.keyboard!.createCursorKeys();
 
 
     this.anims.create({
@@ -90,8 +78,8 @@ export default class HelloWorldScene extends Phaser.Scene {
       this.player?.anims.play('turn');
     }
 
-    if (this.cursors?.up.isDown && this.player?.body.touching.down) {
-      this.player.setVelocityY(-330);
+    if (this.cursors?.up.isDown && this.player!.body!.touching.down) {
+      this.player!.setVelocityY(-990);
     }
 
   }
